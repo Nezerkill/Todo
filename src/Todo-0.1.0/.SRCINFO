@@ -1,0 +1,15 @@
+pkgbase = todo-rs
+	pkgdesc = Terminal To-Do Manager на Rust
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/nezerkill/dotfiles/tree/main/todo-rs
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	depends = gcc-libs
+	makedepends = rust
+	makedepends = cargo
+	source = git+https://github.com/nezerkill/dotfiles.git#subdir=todo-rs
+	sha256sums = SKIP
+
+pkgname = todo-rs
