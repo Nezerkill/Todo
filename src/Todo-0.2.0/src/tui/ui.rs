@@ -97,7 +97,6 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
         )
         .highlight_symbol("▶ ");
 
-    frame.render_widget(Clear, area);
     frame.render_stateful_widget(tasks_list, area, &mut list_state);
 }
 
