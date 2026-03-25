@@ -1,0 +1,30 @@
+# Rust
+/target/
+**/target/
+
+# Cargo
+Cargo.lock
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Test binaries
+tests/**/target
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PKGBUILD
+*.pkg.tar.zst
+*.tar.gz

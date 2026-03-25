@@ -10,6 +10,105 @@ pub enum InputMode {
     Search,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Lang {
+    En,
+    Ru,
+}
+
+impl Lang {
+    pub fn from_str(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "ru" | "rus" | "russian" | "русский" => Lang::Ru,
+            _ => Lang::En,
+        }
+    }
+
+    pub fn tasks_title(self) -> &'static str {
+        match self {
+            Lang::En => "Tasks",
+            Lang::Ru => "Задачи",
+        }
+    }
+
+    pub fn help_title(self) -> &'static str {
+        match self {
+            Lang::En => "Help",
+            Lang::Ru => "Помощь",
+        }
+    }
+
+    pub fn help_text_normal(self) -> &'static str {
+        match self {
+            Lang::En => "j/k:nav g/G:jump Enter:done d:del a:add /:search p:filter r:reload q:quit",
+            Lang::Ru => "j/k:нав g/G:прыжок Enter:вып d:удл a:доб /:поиск p:фильтр r:обн q:выход",
+        }
+    }
+
+    pub fn help_text_add(self) -> &'static str {
+        match self {
+            Lang::En => "Enter:save | Esc:cancel",
+            Lang::Ru => "Enter:сохранить | Esc:отмена",
+        }
+    }
+
+    pub fn help_text_search(self) -> &'static str {
+        match self {
+            Lang::En => "Enter:search | Esc:cancel",
+            Lang::Ru => "Enter:поиск | Esc:отмена",
+        }
+    }
+
+    pub fn msg_task_completed(self) -> &'static str {
+        match self {
+            Lang::En => "Task completed",
+            Lang::Ru => "Задача выполнена",
+        }
+    }
+
+    pub fn msg_task_deleted(self) -> &'static str {
+        match self {
+            Lang::En => "Task deleted",
+            Lang::Ru => "Задача удалена",
+        }
+    }
+
+    pub fn msg_task_added(self) -> &'static str {
+        match self {
+            Lang::En => "Task added",
+            Lang::Ru => "Задача добавлена",
+        }
+    }
+
+    pub fn msg_reloaded(self) -> &'static str {
+        match self {
+            Lang::En => "Reloaded",
+            Lang::Ru => "Обновлено",
+        }
+    }
+
+    pub fn msg_filters_reset(self) -> &'static str {
+        match self {
+            Lang::En => "Filters reset",
+            Lang::Ru => "Фильтры сброшены",
+        }
+    }
+
+    pub fn msg_showing_all(self) -> &'static str {
+        match self {
+            Lang::En => "Showing all tasks",
+            Lang::Ru => "Показаны все задачи",
+        }
+    }
+
+    pub fn msg_showing_pending(self) -> &'static str {
+        match self {
+            Lang::En => "Showing pending only",
+            Lang::Ru => "Только ожидающие",
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Filter {
     pub project: Option<String>,
@@ -37,13 +136,15 @@ pub struct App {
     pub input: String,
     pub cursor: usize,
     pub message: Option<(String, Instant)>,
+    pub lang: Lang,
     storage: JsonStorage,
 }
 
 impl App {
-    pub fn new() -> Result<Self> {
+    pub fn new(lang: &str) -> Result<Self> {
         let storage = JsonStorage::new()?;
         let tasks = storage.load()?;
+        let lang = Lang::from_str(lang);
 
         Ok(Self {
             tasks,
@@ -53,6 +154,7 @@ impl App {
             input: String::new(),
             cursor: 0,
             message: None,
+            lang,
             storage,
         })
     }
@@ -150,8 +252,7 @@ impl App {
                 task.mark_done();
                 self.storage.update(task.clone())?;
                 self.tasks = self.storage.load()?;
-                self.set_message("Task completed");
-                // Не меняем selected, остаёмся на том же индексе
+                self.set_message(self.lang.msg_task_completed());
             }
         }
         Ok(())
@@ -161,8 +262,7 @@ impl App {
         if let Some(id) = self.selected_task_id() {
             self.storage.remove(&id)?;
             self.tasks = self.storage.load()?;
-            self.set_message("Task deleted");
-            // Корректируем индекс после удаления
+            self.set_message(self.lang.msg_task_deleted());
             self.clamp_selected();
         }
         Ok(())
@@ -175,8 +275,7 @@ impl App {
 
         self.storage.add(task.clone())?;
         self.tasks = self.storage.load()?;
-        self.set_message("Task added");
-        // После добавления корректируем индекс
+        self.set_message(self.lang.msg_task_added());
         self.clamp_selected();
         Ok(())
     }

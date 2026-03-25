@@ -15,6 +15,10 @@ use models::Status;
 #[command(version = "0.1.0")]
 #[command(about = "Terminal To-Do Manager", long_about = None)]
 struct Cli {
+    /// Язык интерфейса (ru/en)
+    #[arg(short, long, default_value = "en")]
+    lang: String,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -87,7 +91,11 @@ enum Commands {
     Stats,
 
     /// TUI интерфейс (vim-like)
-    Tui,
+    Tui {
+        /// Язык интерфейса (ru/en)
+        #[arg(short, long, default_value = "en")]
+        lang: String,
+    },
 }
 
 fn main() {
@@ -117,7 +125,7 @@ fn main() {
 
         Commands::Stats => commands::stats::execute(),
 
-        Commands::Tui => commands::tui::execute(),
+        Commands::Tui { lang } => commands::tui::execute(&lang),
     } {
         eprintln!("{} {}", "Ошибка:".red().bold(), e);
         std::process::exit(1);

@@ -1,5 +1,5 @@
 use crate::models::{Priority, Status};
-use crate::tui::app::{App, InputMode};
+use crate::tui::app::{App, InputMode, Lang};
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -19,7 +19,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         ])
         .split(frame.size());
 
-    draw_title(frame, chunks[0]);
+    draw_title(frame, chunks[0], app.lang);
     draw_task_list(frame, chunks[1], app);
     draw_help(frame, chunks[2], app);
 
@@ -28,7 +28,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 }
 
-fn draw_title(frame: &mut Frame, area: Rect) {
+fn draw_title(frame: &mut Frame, area: Rect, lang: Lang) {
     let title = Paragraph::new("Todo TUI")
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .block(Block::default().borders(Borders::ALL).border_style(
@@ -87,7 +87,7 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
     let tasks_list = List::new(items)
         .block(
             Block::default()
-                .title("Задачи")
+                .title(app.lang.tasks_title())
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Blue)),
         )
@@ -96,7 +96,7 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
                 .bg(Color::DarkGray)
                 .add_modifier(Modifier::BOLD),
         )
-        .highlight_symbol("▶ ");
+        .highlight_symbol("> ");
 
     // Рендерим список с состоянием
     frame.render_stateful_widget(tasks_list, area, &mut list_state);
@@ -104,11 +104,9 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
 
 fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
     let help_text = match app.mode {
-        InputMode::Normal => {
-            "j/k:nav g/G:jump Enter:done d:del a:add /:search p:filter r:reload q:quit"
-        }
-        InputMode::Add => "Enter:save | Esc:cancel",
-        InputMode::Search => "Enter:search | Esc:cancel",
+        InputMode::Normal => app.lang.help_text_normal(),
+        InputMode::Add => app.lang.help_text_add(),
+        InputMode::Search => app.lang.help_text_search(),
     };
 
     let message = app
@@ -124,7 +122,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         .style(Style::default().fg(Color::White))
         .block(
             Block::default()
-                .title("Помощь")
+                .title(app.lang.help_title())
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::Blue)),
         );
