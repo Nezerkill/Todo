@@ -96,6 +96,13 @@ enum Commands {
         #[arg(short, long, default_value = "en")]
         lang: String,
     },
+
+    /// Установить язык по умолчанию
+    Lang {
+        /// Язык (ru/en)
+        #[arg(required = true)]
+        language: String,
+    },
 }
 
 fn main() {
@@ -126,6 +133,18 @@ fn main() {
         Commands::Stats => commands::stats::execute(),
 
         Commands::Tui { lang } => commands::tui::execute(&lang),
+
+        Commands::Lang { language } => {
+            // Сохраняем язык в конфиг
+            let config_dir = dirs::config_dir()
+                .unwrap_or_else(|| std::path::PathBuf::from("~/.config"))
+                .join("todo-rs");
+            std::fs::create_dir_all(&config_dir).ok();
+            let config_file = config_dir.join("config");
+            std::fs::write(&config_file, format!("lang={}\n", language)).ok();
+            println!("Language set to: {}", language);
+            Ok(())
+        }
     } {
         eprintln!("{} {}", "Ошибка:".red().bold(), e);
         std::process::exit(1);

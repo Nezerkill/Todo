@@ -107,6 +107,20 @@ impl Lang {
             Lang::Ru => "Только ожидающие",
         }
     }
+
+    pub fn popup_title_add(self) -> &'static str {
+        match self {
+            Lang::En => "Add task",
+            Lang::Ru => "Добавить задачу",
+        }
+    }
+
+    pub fn popup_title_search(self) -> &'static str {
+        match self {
+            Lang::En => "Search",
+            Lang::Ru => "Поиск",
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

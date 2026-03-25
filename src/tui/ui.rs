@@ -28,7 +28,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 }
 
-fn draw_title(frame: &mut Frame, area: Rect, lang: Lang) {
+fn draw_title(frame: &mut Frame, area: Rect, _lang: Lang) {
     let title = Paragraph::new("Todo TUI")
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .block(Block::default().borders(Borders::ALL).border_style(
@@ -137,8 +137,8 @@ fn draw_input_popup(frame: &mut Frame, app: &App) {
     frame.render_widget(Clear, area);
 
     let (title, input) = match app.mode {
-        InputMode::Add => ("Добавить задачу", &app.input),
-        InputMode::Search => ("Поиск", &app.input),
+        InputMode::Add => (app.lang.popup_title_add(), &app.input),
+        InputMode::Search => (app.lang.popup_title_search(), &app.input),
         _ => return,
     };
 
