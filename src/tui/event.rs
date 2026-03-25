@@ -138,11 +138,17 @@ fn handle_add_mode(key: KeyEvent, app: &mut App) {
                     }
                 }
 
+                // Очищаем input ДО добавления задачи
+                app.input.clear();
+                app.cursor = 0;
+                app.mode = InputMode::Normal;
+
                 let _ = app.add_task(title.trim().to_string(), priority, project);
+            } else {
+                app.mode = InputMode::Normal;
+                app.input.clear();
+                app.cursor = 0;
             }
-            app.mode = InputMode::Normal;
-            app.input.clear();
-            app.cursor = 0;
         }
         KeyCode::Esc => {
             app.mode = InputMode::Normal;

@@ -9,6 +9,9 @@ use ratatui::{
 };
 
 pub fn draw(frame: &mut Frame, app: &mut App) {
+    // Очищаем весь экран перед перерисовкой
+    frame.render_widget(Clear, frame.size());
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -97,7 +100,6 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
         )
         .highlight_symbol("▶ ");
 
-    frame.render_widget(Clear, area);
     frame.render_stateful_widget(tasks_list, area, &mut list_state);
 }
 
