@@ -1,6 +1,6 @@
 # Maintainer: nezerkill
 pkgname=todo-rs
-pkgver=0.1.1
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Terminal To-Do Manager на Rust"
 arch=('x86_64' 'aarch64')
