@@ -9,16 +9,13 @@ use ratatui::{
 };
 
 pub fn draw(frame: &mut Frame, app: &mut App) {
-    // Очищаем весь экран перед перерисовкой
-    frame.render_widget(Clear, frame.size());
-
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
         .constraints([
-            Constraint::Length(3),
-            Constraint::Min(0),
-            Constraint::Length(3),
+            Constraint::Length(3),  // Заголовок
+            Constraint::Min(0),     // Список задач
+            Constraint::Length(3),  // Помощь
         ])
         .split(frame.size());
 
@@ -45,7 +42,8 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
 
     let items: Vec<ListItem> = filtered
         .iter()
-        .map(|task| {
+        .enumerate()
+        .map(|(_idx, task)| {
             let priority_style = match task.priority {
                 Priority::High => Color::Red,
                 Priority::Medium => Color::Yellow,
@@ -83,6 +81,7 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
         })
         .collect();
 
+    // Создаем ListState с правильным selected индексом
     let mut list_state = ListState::default();
     list_state.select(app.selected);
 
@@ -100,13 +99,14 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
         )
         .highlight_symbol("▶ ");
 
+    // Рендерим список с состоянием
     frame.render_stateful_widget(tasks_list, area, &mut list_state);
 }
 
 fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
     let help_text = match app.mode {
         InputMode::Normal => {
-            "j/k: вверх/вниз | g/G: начало/конец | Enter: выполнить | d: удалить | a: добавить | /: поиск | q: выход | r: обновить"
+            "j/k: вверх/вниз | g/G: начало/конец | Enter: выполнить | d/x: удалить | a: добавить | /: поиск | p: фильтр | r: обновить | q: выход"
         }
         InputMode::Add => "Enter: сохранить | Esc: отмена",
         InputMode::Search => "Enter: поиск | Esc: отмена",
@@ -133,6 +133,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
 fn draw_input_popup(frame: &mut Frame, app: &App) {
     let area = centered_rect(60, 20, frame.size());
 
+    // Очищаем область под popup
     frame.render_widget(Clear, area);
 
     let (title, input) = match app.mode {
@@ -153,6 +154,7 @@ fn draw_input_popup(frame: &mut Frame, app: &App) {
 
     frame.render_widget(popup, area);
 
+    // Устанавливаем курсор
     frame.set_cursor(area.x + app.cursor as u16 + 1, area.y + 1);
 }
 

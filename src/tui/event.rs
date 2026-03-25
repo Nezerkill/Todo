@@ -1,5 +1,5 @@
-use crate::models::Priority;
-use crate::tui::app::{App, InputMode};
+use crate::models::{Priority, Status};
+use crate::tui::app::{App, Filter, InputMode};
 use anyhow::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::backend::CrosstermBackend;
@@ -75,7 +75,7 @@ fn handle_normal_mode(key: KeyEvent, app: &mut App) -> Result<bool> {
         KeyCode::Enter => {
             app.mark_done()?;
         }
-        KeyCode::Char('d') => {
+        KeyCode::Char('d') | KeyCode::Char('x') => {
             app.delete_task()?;
         }
         KeyCode::Char('a') => {
@@ -99,8 +99,19 @@ fn handle_normal_mode(key: KeyEvent, app: &mut App) -> Result<bool> {
             app.cursor = 0;
         }
         KeyCode::Esc => {
-            app.filter = Default::default();
+            app.filter = Filter::default();
+            app.clamp_selected();
             app.set_message("✓ Фильтры сброшены");
+        }
+        KeyCode::Char('p') => {
+            // Переключение фильтра по статусу (все/pending)
+            if app.filter.status.is_some() {
+                app.set_filter_status(None);
+                app.set_message("✓ Показаны все задачи");
+            } else {
+                app.set_filter_status(Some(Status::Pending));
+                app.set_message("✓ Только ожидающие");
+            }
         }
         _ => {}
     }

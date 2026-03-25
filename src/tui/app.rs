@@ -31,8 +31,7 @@ impl Default for Filter {
 
 pub struct App {
     pub tasks: Vec<Task>,
-    pub selected: Option<usize>,
-    pub scroll: usize,
+    pub selected: Option<usize>,  // Индекс в filtered_tasks()
     pub mode: InputMode,
     pub filter: Filter,
     pub input: String,
@@ -48,8 +47,7 @@ impl App {
 
         Ok(Self {
             tasks,
-            selected: None,
-            scroll: 0,
+            selected: Some(0),
             mode: InputMode::Normal,
             filter: Filter::default(),
             input: String::new(),
@@ -88,6 +86,20 @@ impl App {
             .collect()
     }
 
+    /// Корректирует индекс selected после изменения фильтра или удаления
+    pub fn clamp_selected(&mut self) {
+        let len = self.filtered_tasks().len();
+        if len == 0 {
+            self.selected = None;
+        } else if let Some(idx) = self.selected {
+            if idx >= len {
+                self.selected = Some(len - 1);
+            }
+        } else {
+            self.selected = Some(0);
+        }
+    }
+
     pub fn select_next(&mut self) {
         let filtered = self.filtered_tasks();
         if filtered.is_empty() {
@@ -108,6 +120,8 @@ impl App {
     pub fn select_first(&mut self) {
         if !self.filtered_tasks().is_empty() {
             self.selected = Some(0);
+        } else {
+            self.selected = None;
         }
     }
 
@@ -115,6 +129,8 @@ impl App {
         let len = self.filtered_tasks().len();
         if len > 0 {
             self.selected = Some(len - 1);
+        } else {
+            self.selected = None;
         }
     }
 
@@ -135,6 +151,7 @@ impl App {
                 self.storage.update(task.clone())?;
                 self.tasks = self.storage.load()?;
                 self.set_message("✓ Задача выполнена");
+                // Не меняем selected, остаёмся на том же индексе
             }
         }
         Ok(())
@@ -145,15 +162,8 @@ impl App {
             self.storage.remove(&id)?;
             self.tasks = self.storage.load()?;
             self.set_message("✓ Задача удалена");
-
-            if self.selected.is_some() {
-                let len = self.filtered_tasks().len();
-                if len == 0 {
-                    self.selected = None;
-                } else {
-                    self.selected = Some(self.selected.unwrap().min(len - 1));
-                }
-            }
+            // Корректируем индекс после удаления
+            self.clamp_selected();
         }
         Ok(())
     }
@@ -166,6 +176,8 @@ impl App {
         self.storage.add(task.clone())?;
         self.tasks = self.storage.load()?;
         self.set_message("✓ Задача добавлена");
+        // После добавления корректируем индекс
+        self.clamp_selected();
         Ok(())
     }
 
@@ -175,6 +187,8 @@ impl App {
         } else {
             Some(Status::Pending)
         };
+        // После изменения фильтра корректируем индекс
+        self.clamp_selected();
     }
 
     pub fn set_message(&mut self, msg: impl Into<String>) {
@@ -191,6 +205,12 @@ impl App {
 
     pub fn reload(&mut self) -> Result<()> {
         self.tasks = self.storage.load()?;
+        self.clamp_selected();
         Ok(())
+    }
+
+    pub fn set_filter_status(&mut self, status: Option<Status>) {
+        self.filter.status = status;
+        self.clamp_selected();
     }
 }
