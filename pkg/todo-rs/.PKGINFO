@@ -3,12 +3,12 @@
 pkgname = todo-rs
 pkgbase = todo-rs
 xdata = pkgtype=pkg
-pkgver = 0.2.2-1
+pkgver = 0.3.0-1
 pkgdesc = Terminal To-Do Manager на Rust
 url = https://github.com/Nezerkill/Todo
-builddate = 1774467765
+builddate = 1774468338
 packager = Unknown Packager
-size = 1781856
+size = 1785392
 arch = x86_64
 license = MIT
 depend = gcc-libs

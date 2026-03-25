@@ -1,23 +1,37 @@
 use crate::models::{Priority, Status};
 use crate::tui::app::{App, Filter, InputMode};
 use anyhow::Result;
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
-use ratatui::backend::CrosstermBackend;
-use ratatui::Terminal;
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use ratatui::{
+    backend::CrosstermBackend,
+    Terminal,
+};
 use std::io;
-use std::time::Duration;
 
 pub fn run(mut app: App) -> Result<()> {
-    let backend = CrosstermBackend::new(io::stderr());
+    // Включаем raw mode и альтернативный экран
+    enable_raw_mode()?;
+    let mut stdout = io::stderr();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    
+    let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    terminal.clear()?;
-    terminal.hide_cursor()?;
-
+    // Запускаем приложение
     let res = run_app(&mut terminal, &mut app);
 
+    // Восстанавливаем терминал
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
     terminal.show_cursor()?;
-    terminal.clear()?;
 
     if let Err(err) = res {
         eprintln!("Ошибка: {:?}", err);
@@ -31,22 +45,28 @@ fn run_app(
     app: &mut App,
 ) -> Result<()> {
     loop {
+        // Принудительная перерисовка всего экрана
         terminal.draw(|f| super::ui::draw(f, app))?;
 
-        if event::poll(Duration::from_millis(250))? {
+        // Ожидание события с таймаутом
+        if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
-                match app.mode {
-                    InputMode::Normal => {
-                        if handle_normal_mode(key, app)? {
-                            return Ok(());
+                // Обрабатываем только нажатия (не повторения)
+                if key.kind == KeyEventKind::Press {
+                    match app.mode {
+                        InputMode::Normal => {
+                            if handle_normal_mode(key, app)? {
+                                return Ok(());
+                            }
                         }
+                        InputMode::Add => handle_add_mode(key, app),
+                        InputMode::Search => handle_search_mode(key, app),
                     }
-                    InputMode::Add => handle_add_mode(key, app),
-                    InputMode::Search => handle_search_mode(key, app),
                 }
             }
         }
 
+        // Обновляем таймеры (сообщения)
         app.tick();
     }
 }

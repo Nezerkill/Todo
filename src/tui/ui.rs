@@ -42,8 +42,7 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
 
     let items: Vec<ListItem> = filtered
         .iter()
-        .enumerate()
-        .map(|(_idx, task)| {
+        .map(|task| {
             let priority_style = match task.priority {
                 Priority::High => Color::Red,
                 Priority::Medium => Color::Yellow,
@@ -117,6 +116,9 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         .as_ref()
         .map(|(msg, _)| msg.as_str())
         .unwrap_or("");
+
+    // Очищаем область перед отрисовкой help
+    frame.render_widget(Clear, area);
 
     let help = Paragraph::new(format!("{} | {}", help_text, message))
         .style(Style::default().fg(Color::White))
