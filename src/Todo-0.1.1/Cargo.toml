@@ -20,10 +20,6 @@ chrono = { version = "0.4", features = ["serde"] }
 comfy-table = "7.0"
 colored = "2.0"
 
-# TUI
-ratatui = "0.26"
-crossterm = "0.27"
-
 # Ошибки
 thiserror = "1.0"
 anyhow = "1.0"

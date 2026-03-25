@@ -2,7 +2,6 @@ mod commands;
 mod format;
 mod models;
 mod storage;
-mod tui;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -85,9 +84,6 @@ enum Commands {
 
     /// Показать статистику
     Stats,
-
-    /// TUI интерфейс (vim-like)
-    Tui,
 }
 
 fn main() {
@@ -116,8 +112,6 @@ fn main() {
         Commands::Remove { id } => commands::remove::execute(id),
 
         Commands::Stats => commands::stats::execute(),
-
-        Commands::Tui => commands::tui::execute(),
     } {
         eprintln!("{} {}", "Ошибка:".red().bold(), e);
         std::process::exit(1);
