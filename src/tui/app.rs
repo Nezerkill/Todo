@@ -150,7 +150,7 @@ impl App {
                 task.mark_done();
                 self.storage.update(task.clone())?;
                 self.tasks = self.storage.load()?;
-                self.set_message("✓ Задача выполнена");
+                self.set_message("Task completed");
                 // Не меняем selected, остаёмся на том же индексе
             }
         }
@@ -161,7 +161,7 @@ impl App {
         if let Some(id) = self.selected_task_id() {
             self.storage.remove(&id)?;
             self.tasks = self.storage.load()?;
-            self.set_message("✓ Задача удалена");
+            self.set_message("Task deleted");
             // Корректируем индекс после удаления
             self.clamp_selected();
         }
@@ -175,7 +175,7 @@ impl App {
 
         self.storage.add(task.clone())?;
         self.tasks = self.storage.load()?;
-        self.set_message("✓ Задача добавлена");
+        self.set_message("Task added");
         // После добавления корректируем индекс
         self.clamp_selected();
         Ok(())

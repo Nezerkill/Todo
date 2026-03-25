@@ -110,7 +110,7 @@ fn handle_normal_mode(key: KeyEvent, app: &mut App) -> Result<bool> {
         }
         KeyCode::Char('r') => {
             app.reload()?;
-            app.set_message("✓ Обновлено");
+            app.set_message("Reloaded");
         }
         KeyCode::Char('A') => {
             // Быстрое добавление с высоким приоритетом
@@ -121,16 +121,16 @@ fn handle_normal_mode(key: KeyEvent, app: &mut App) -> Result<bool> {
         KeyCode::Esc => {
             app.filter = Filter::default();
             app.clamp_selected();
-            app.set_message("✓ Фильтры сброшены");
+            app.set_message("Filters reset");
         }
         KeyCode::Char('p') => {
             // Переключение фильтра по статусу (все/pending)
             if app.filter.status.is_some() {
                 app.set_filter_status(None);
-                app.set_message("✓ Показаны все задачи");
+                app.set_message("Showing all tasks");
             } else {
                 app.set_filter_status(Some(Status::Pending));
-                app.set_message("✓ Только ожидающие");
+                app.set_message("Showing pending only");
             }
         }
         _ => {}

@@ -29,7 +29,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 }
 
 fn draw_title(frame: &mut Frame, area: Rect) {
-    let title = Paragraph::new("📝 Todo TUI")
+    let title = Paragraph::new("Todo TUI")
         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .block(Block::default().borders(Borders::ALL).border_style(
             Style::default().fg(Color::Blue),
@@ -50,15 +50,15 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
             };
 
             let status_icon = match task.status {
-                Status::Pending => "⬜",
-                Status::Done => "✅",
-                Status::Deferred => "⏸️",
+                Status::Pending => "[ ]",
+                Status::Done => "[X]",
+                Status::Deferred => "[/]",
             };
 
             let priority_str = match task.priority {
-                Priority::High => "🔴",
-                Priority::Medium => "🟡",
-                Priority::Low => "🟢",
+                Priority::High => "!",
+                Priority::Medium => "=",
+                Priority::Low => "-",
             };
 
             let project = task
@@ -105,10 +105,10 @@ fn draw_task_list(frame: &mut Frame, area: Rect, app: &mut App) {
 fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
     let help_text = match app.mode {
         InputMode::Normal => {
-            "j/k: вверх/вниз | g/G: начало/конец | Enter: выполнить | d/x: удалить | a: добавить | /: поиск | p: фильтр | r: обновить | q: выход"
+            "j/k:nav g/G:jump Enter:done d:del a:add /:search p:filter r:reload q:quit"
         }
-        InputMode::Add => "Enter: сохранить | Esc: отмена",
-        InputMode::Search => "Enter: поиск | Esc: отмена",
+        InputMode::Add => "Enter:save | Esc:cancel",
+        InputMode::Search => "Enter:search | Esc:cancel",
     };
 
     let message = app
