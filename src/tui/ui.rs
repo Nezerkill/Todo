@@ -156,7 +156,7 @@ fn draw_input_popup(frame: &mut Frame, app: &App) {
 
     frame.render_widget(popup, area);
 
-    // Устанавливаем курсор
+    // Устанавливаем курсор (app.cursor теперь в символах)
     frame.set_cursor(area.x + app.cursor as u16 + 1, area.y + 1);
 }
 

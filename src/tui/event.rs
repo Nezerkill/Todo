@@ -187,18 +187,46 @@ fn handle_add_mode(key: KeyEvent, app: &mut App) {
             app.cursor = 0;
         }
         KeyCode::Char(c) => {
-            app.input.insert(app.cursor, c);
+            // Вставляем символ по индексу в символах, а не байтах
+            let mut char_idx = 0;
+            let mut byte_idx = 0;
+            for (i, ch) in app.input.char_indices() {
+                if char_idx == app.cursor {
+                    byte_idx = i;
+                    break;
+                }
+                char_idx += 1;
+                byte_idx = i + ch.len_utf8();
+            }
+            app.input.insert_str(byte_idx, &c.to_string());
             app.cursor += 1;
         }
         KeyCode::Backspace => {
-            if app.cursor > 0 {
-                app.input.remove(app.cursor - 1);
-                app.cursor -= 1;
+            if app.cursor > 0 && !app.input.is_empty() {
+                // Находим позицию предыдущего символа
+                let mut char_indices: Vec<(usize, char)> = app.input.char_indices().collect();
+                if app.cursor <= char_indices.len() {
+                    if app.cursor > 0 {
+                        let remove_idx = if app.cursor == char_indices.len() {
+                            char_indices.last().map(|(i, _)| *i).unwrap_or(0)
+                        } else {
+                            char_indices[app.cursor - 1].0
+                        };
+                        let char_len = app.input[remove_idx..].chars().next().map(|c| c.len_utf8()).unwrap_or(1);
+                        app.input.replace_range(remove_idx..remove_idx + char_len, "");
+                        app.cursor -= 1;
+                    }
+                }
             }
         }
         KeyCode::Delete => {
-            if app.cursor < app.input.len() {
-                app.input.remove(app.cursor);
+            if app.cursor < app.input.chars().count() && !app.input.is_empty() {
+                let char_indices: Vec<(usize, char)> = app.input.char_indices().collect();
+                if app.cursor < char_indices.len() {
+                    let remove_idx = char_indices[app.cursor].0;
+                    let char_len = char_indices[app.cursor].1.len_utf8();
+                    app.input.replace_range(remove_idx..remove_idx + char_len, "");
+                }
             }
         }
         KeyCode::Left => {
@@ -207,7 +235,7 @@ fn handle_add_mode(key: KeyEvent, app: &mut App) {
             }
         }
         KeyCode::Right => {
-            if app.cursor < app.input.len() {
+            if app.cursor < app.input.chars().count() {
                 app.cursor += 1;
             }
         }
@@ -215,7 +243,7 @@ fn handle_add_mode(key: KeyEvent, app: &mut App) {
             app.cursor = 0;
         }
         KeyCode::End => {
-            app.cursor = app.input.len();
+            app.cursor = app.input.chars().count();
         }
         _ => {}
     }
@@ -241,13 +269,32 @@ fn handle_search_mode(key: KeyEvent, app: &mut App) {
             app.filter.search = None;
         }
         KeyCode::Char(c) => {
-            app.input.insert(app.cursor, c);
+            let mut char_idx = 0;
+            let mut byte_idx = 0;
+            for (i, ch) in app.input.char_indices() {
+                if char_idx == app.cursor {
+                    byte_idx = i;
+                    break;
+                }
+                char_idx += 1;
+                byte_idx = i + ch.len_utf8();
+            }
+            app.input.insert_str(byte_idx, &c.to_string());
             app.cursor += 1;
         }
         KeyCode::Backspace => {
-            if app.cursor > 0 {
-                app.input.remove(app.cursor - 1);
-                app.cursor -= 1;
+            if app.cursor > 0 && !app.input.is_empty() {
+                let char_indices: Vec<(usize, char)> = app.input.char_indices().collect();
+                if app.cursor <= char_indices.len() && app.cursor > 0 {
+                    let remove_idx = if app.cursor == char_indices.len() {
+                        char_indices.last().map(|(i, _)| *i).unwrap_or(0)
+                    } else {
+                        char_indices[app.cursor - 1].0
+                    };
+                    let char_len = app.input[remove_idx..].chars().next().map(|c| c.len_utf8()).unwrap_or(1);
+                    app.input.replace_range(remove_idx..remove_idx + char_len, "");
+                    app.cursor -= 1;
+                }
             }
         }
         KeyCode::Left => {
@@ -256,9 +303,15 @@ fn handle_search_mode(key: KeyEvent, app: &mut App) {
             }
         }
         KeyCode::Right => {
-            if app.cursor < app.input.len() {
+            if app.cursor < app.input.chars().count() {
                 app.cursor += 1;
             }
+        }
+        KeyCode::Home => {
+            app.cursor = 0;
+        }
+        KeyCode::End => {
+            app.cursor = app.input.chars().count();
         }
         _ => {}
     }
