@@ -1,6 +1,6 @@
 # Maintainer: nezerkill
 pkgname=todo-rs
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="Terminal To-Do Manager на Rust"
 arch=('x86_64' 'aarch64')
@@ -13,7 +13,7 @@ sha256sums=('SKIP')
 
 build() {
     cd "$srcdir/Todo-$pkgver"
-    cargo build --frozen --release
+    cargo build --release
 }
 
 package() {
